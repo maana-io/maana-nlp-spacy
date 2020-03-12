@@ -1,4 +1,4 @@
-# gracyql
+# maana-nlp-spacy-wrapper
 A thin GraphQL wrapper around spacy
 
 
