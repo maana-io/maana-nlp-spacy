@@ -317,7 +317,7 @@ class ModelMeta(graphene.ObjectType):
 class Batch(graphene.ObjectType):
     class Meta:
         default_resolver = dict_resolver
-    batch_id = graphene.UUID()
+    batch_id = graphene.ID()
     docs = graphene.List(Doc)
 
 
