@@ -1,16 +1,15 @@
 python-dateutil
 starlette
 starlette-prometheus
-plac
+plac < 1.0.0
 uvicorn==0.9.0
 graphene
-#numpy==1.16.4
-spacy==2.1.9
+numpy==1.16.4
 munch>=2.3.2
 wheel
 pytest
 structlog
 python-json-logger
 PyYAML
-#PyICU
-#nltk
+gunicorn
+spacy >= 2.3.0

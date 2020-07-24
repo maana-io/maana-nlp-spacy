@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 # Use the Python executable provided from the `-p` option, or a default.
-[[ $1 = "-p" ]] && PYTHON=$2 || PYTHON="python3"
+PYTHON="python"
 
 MIN_VERSION="(3, 6)"
 VERSION_OK=`"$PYTHON" -c "import sys; print(sys.version_info[0:2] >= $MIN_VERSION and '1' or '');"`
@@ -19,6 +19,6 @@ VENV="venv"
 PIP="$VENV/bin/pip"
 
 set -x
-"$PYTHON" -m venv "$VENV"
-"$PIP" install -r "$REQUIREMENTS"
+# "$PYTHON" -m venv "$VENV"
+pip install -r "$REQUIREMENTS"
 
