@@ -1,16 +1,19 @@
-apiVersion : apps/v1beta1
+apiVersion : apps/v1
 kind: Deployment
 metadata:
-  name: nlpspacy 
+  name: nlp-spacy 
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: nlp-spacy 
   template:
     metadata:
       labels:
-        app: nlpspacy 
+        app: nlp-spacy 
     spec:
       containers:
-        - name: nlpspacy 
-          image: services.azurecr.io/nlpspacy
+        - name: nlp-spacy 
+          image: services.azurecr.io/nlp-spacy
           ports:
           - containerPort: 8990
