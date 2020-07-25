@@ -12,7 +12,7 @@ variables:
 
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'b66b54c3-25a0-4960-8a28-3cd459fbbe04'
-  imageRepository: 'nlpspacy'
+  imageRepository: 'nlp-spacy'
   containerRegistry: 'services.azurecr.io'
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
