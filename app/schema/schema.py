@@ -81,14 +81,14 @@ class BatchSlice:
         self.uuid_ = uuid.uuid4()
         self.gen = doc_generator
         self.max = max
-        self.id = 0
+        self.idx = 0
 
     def next(self, next):
-        self.id += next
+        self.idx += next
         return itertools.islice(self.gen, 0, next)
 
     def has_next(self):
-        return self.id < self.max
+        return self.idx < self.max
 
 class BatchDocs:
     def __init__(self):
@@ -130,10 +130,10 @@ class Token(graphene.ObjectType):
         interfaces = (Container,)
         default_resolver = spacy_attr_resolver
 
-    id = graphene.Int(description="The index of the token within the parent document.")
+    idx = graphene.Int(description="The index of the token within the parent document.")
 
-    def resolve_id(self, info):
-        return self.i
+    def resolve_idx(self, info):
+        return self.idx
 
     start = graphene.Int(description="The starting character offset of the token within the parent document.")
 
@@ -266,7 +266,7 @@ class Doc(graphene.ObjectType):
     class Meta:
         interfaces = (Container,)
 
-    id = graphene.Int(default_value=0)
+    idx = graphene.Int(default_value=0)
     tokens = graphene.List(Token, description="The tokens of the document.")
 
     def resolve_tokens(self, info):
@@ -334,37 +334,37 @@ class Nlp(graphene.ObjectType):
         nlp = spacy_models.get_model(self['model'], self['cfg'])
         return nlp(text, disable=self['disable'])
 
-    batch = graphene.Field(Batch, texts=graphene.List(graphene.String, required=False, default_value=None),
-                         batch_id=graphene.String(required=False, default_value=None),
-                         batch_size=graphene.Int(required=False, default_value=None),
-                         next=graphene.Int(required=False, default_value=None)
-                         )
+    # batch = graphene.Field(Batch, texts=graphene.List(graphene.String, required=False, default_value=None),
+    #                      batch_id=graphene.String(required=False, default_value=None),
+    #                      batch_size=graphene.Int(required=False, default_value=None),
+    #                      next=graphene.Int(required=False, default_value=None)
+    #                      )
 
-    def resolve_batch(self, info, **args):
-        if 'texts' in args:
-            texts = args['texts']
-            batch_size = args.get('batch_size', len(texts))
-            nlp = spacy_models.get_model(self['model'], self['cfg'], len(texts))
-            batch_ = BatchSlice(nlp.pipe(texts, batch_size=batch_size, disable=self['disable'], cleanup=True), len(texts))
-            batch_docs.add(batch_)
-        elif 'batch_id' in args:
-            batch_ = batch_docs.get(args.get('batch_id'))
-            if batch_:
-                if not batch_.has_next():
-                    batch_docs.remove(batch_)
-            else:
-                raise GraphQLError('Invalid batch_id %s or batch is exhausted!'%args.get('batch_id'))
-        else:
-            raise GraphQLError('One of texts or batch_id must be provided!')
-        if batch_:
-            batch_id = batch_.uuid_
-            next = args.get('next', batch_.max)
-            docs = batch_.next(next)
-            if not batch_.has_next():
-                batch_docs.remove(batch_)
-            return { 'batch_id' : batch_id, 'docs' : docs }
-        else:
-            return None
+    # def resolve_batch(self, info, **args):
+    #     if 'texts' in args:
+    #         texts = args['texts']
+    #         batch_size = args.get('batch_size', len(texts))
+    #         nlp = spacy_models.get_model(self['model'], self['cfg'], len(texts))
+    #         batch_ = BatchSlice(nlp.pipe(texts, batch_size=batch_size, disable=self['disable'], cleanup=True), len(texts))
+    #         batch_docs.add(batch_)
+    #     elif 'batch_id' in args:
+    #         batch_ = batch_docs.get(args.get('batch_id'))
+    #         if batch_:
+    #             if not batch_.has_next():
+    #                 batch_docs.remove(batch_)
+    #         else:
+    #             raise GraphQLError('Invalid batch_id %s or batch is exhausted!'%args.get('batch_id'))
+    #     else:
+    #         raise GraphQLError('One of texts or batch_id must be provided!')
+    #     if batch_:
+    #         batch_id = batch_.uuid_
+    #         next = args.get('next', batch_.max)
+    #         docs = batch_.next(next)
+    #         if not batch_.has_next():
+    #             batch_docs.remove(batch_)
+    #         return { 'batch_id' : batch_id, 'docs' : docs }
+    #     else:
+    #         return None
 
 
 class Query(graphene.ObjectType):
