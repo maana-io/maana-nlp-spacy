@@ -12,4 +12,4 @@ structlog
 python-json-logger
 PyYAML
 gunicorn
-spacy >= 2.3.0
+spacy==2.1.3

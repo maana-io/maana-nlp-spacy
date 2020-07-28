@@ -13,7 +13,7 @@ RUN chmod +x ./scripts/*
 RUN pip install -r requirements.txt
 
 RUN python -m spacy download en
+RUN pip install neuralcoref --no-binary neuralcoref
 
-RUN ls
 EXPOSE 8990
 CMD ./scripts/start.sh

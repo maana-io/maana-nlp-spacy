@@ -5,6 +5,7 @@ import uuid
 import gc
 import graphene
 import spacy
+import neuralcoref
 import structlog
 from graphene.types.resolver import dict_resolver
 from graphql import GraphQLError
@@ -42,11 +43,14 @@ def load_model(model, cfg):
     # ]
     logger.info("Load model %s"%model, cfg=cfg)
     nlp = spacy.load(model, **overrides)
+    
+    
     #sentencizer = PunktSentencizer(nlp, **overrides)
     sentencizer = RuleSentencizer(nlp, **overrides)
     #sentencizer = ICUSentencizer(nlp, **overrides)
     #nlp.add_pipe(sentencizer, first=True)
     nlp.add_pipe(sentencizer)
+    neuralcoref.add_to_pipe(nlp)
     return nlp
 
 
@@ -259,6 +263,26 @@ class Cat(graphene.ObjectType):
         return self[1]
 
 
+class CorefCluster(graphene.ObjectType):
+    """A CorefCluster is a cluster of coreferring mentions which has 3 attributes and a few methods to simplify the navigation inside a cluster"""
+    
+    """Index of the cluster in the Doc"""
+    i = graphene.Int()
+
+    def resolve_i(self, info):
+        print(self)
+        return self.i
+        
+    main = graphene.Field(Span)
+
+    def resolve_main(self, info):
+        print(self)
+        return self.main
+
+    mentions = graphene.List(Span, description="""List of all the mentions in the cluster""")
+    def resolve_mentions(self, info):
+        return list(self.mentions)
+
 class Doc(graphene.ObjectType):
     """A container for accessing linguistic annotations.
     Access sentences and named entities."""
@@ -285,6 +309,19 @@ class Doc(graphene.ObjectType):
     def resolve_ents(self, info):
         return list(self.ents)
 
+    """Has any coreference has been resolved in the Doc"""
+    has_corefs = graphene.Boolean
+
+    def resolve_has_corefs(self, info):
+        return self._.has_corefs
+
+    coref_clusters = graphene.List(CorefCluster, description="All the clusters of corefering mentions in the doc")    
+
+    def resolve_coref_clusters(self, info):
+        print(self._.has_coref)
+        print(self._.coref_clusters)
+        return list(self._.coref_clusters)
+
     noun_chunks = graphene.List(Span,
                                 description="""The base noun phrases in the document.
     Returns a list of base noun-phrase Span objects, if the document has been syntactically parsed.
@@ -297,6 +334,7 @@ class Doc(graphene.ObjectType):
 
     def resolve_cats(self, info):
         return list(self.cats.items())
+        
 
 
 class ModelMeta(graphene.ObjectType):
